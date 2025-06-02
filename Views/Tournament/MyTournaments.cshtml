@@ -1,0 +1,137 @@
+﻿@model IEnumerable<TournamentSystem.Models.Tournament>
+@{
+    ViewData["Title"] = "Todos os Torneios";
+}
+
+<div class="container">
+    <h1>
+        <i class="fas fa-trophy text-warning me-2"></i>
+        Todos os Torneios Disponíveis
+    </h1>
+    <p class="text-muted mb-4">Explore todos os torneios de League of Legends e Valorant</p>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var tournament in Model.OrderByDescending(t => t.CreatedAt))
+            {
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow h-100">
+                        <div class="card-header @(tournament.Game == GameType.LeagueOfLegends ? "bg-primary" : "bg-danger") text-white">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title mb-1">@tournament.Name</h5>
+                                    <span class="badge bg-light text-dark">
+                                        <i class="fas @(tournament.Game == GameType.LeagueOfLegends ? "fa-crown" : "fa-crosshairs") me-1"></i>
+                                        @tournament.Game.GetDisplayName()
+                                    </span>
+                                </div>
+                                <span class="badge bg-success">
+                                    @tournament.Status.GetDisplayName()
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@tournament.Description</p>
+
+                            <div class="mb-3">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="stat-mini">
+                                            <div class="stat-number-mini">@tournament.Participants.Count</div>
+                                            <div class="stat-label-mini">Participantes</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-mini">
+                                            <div class="stat-number-mini">@tournament.MaxParticipants</div>
+                                            <div class="stat-label-mini">Máximo</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="stat-mini">
+                                            <div class="stat-number-mini">
+                                                @if (tournament.Prize > 0)
+                                                {
+                                                    <span>R$ @tournament.Prize.ToString("N0")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>-</span>
+                                                }
+                                            </div>
+                                            <div class="stat-label-mini">Prêmio</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tournament-dates">
+                                <div class="date-item">
+                                    <i class="fas fa-calendar-alt text-success me-2"></i>
+                                    <strong>Início:</strong> @tournament.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                                <div class="date-item">
+                                    <i class="fas fa-calendar-check text-danger me-2"></i>
+                                    <strong>Fim:</strong> @tournament.EndDate.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@tournament.Id" class="btn btn-outline-primary flex-fill">
+                                <i class="fas fa-eye me-1"></i>Ver Detalhes
+                            </a>
+                            <a asp-action="Join" asp-route-id="@tournament.Id" class="btn btn-success flex-fill">
+                                <i class="fas fa-plus me-1"></i>Participar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-trophy fa-4x text-muted mb-3"></i>
+            <h3 class="text-muted mb-3">Nenhum torneio disponível</h3>
+            <p class="text-muted mb-4">Seja o primeiro a criar um torneio!</p>
+            <a asp-action="Create" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Criar Primeiro Torneio
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .stat-mini {
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-number-mini {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #0d6efd;
+    }
+
+    .stat-label-mini {
+        font-size: 0.7rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tournament-dates .date-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+        .tournament-dates .date-item i {
+            width: 16px;
+        }
+</style>

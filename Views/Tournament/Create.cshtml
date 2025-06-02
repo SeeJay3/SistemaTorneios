@@ -1,0 +1,113 @@
+﻿@model TournamentSystem.Models.ViewModels.CreateTournamentViewModel
+@{
+    ViewData["Title"] = "Criar Torneio";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Criar Novo Torneio
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display: none;"></div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="Name" class="form-label">Nome do Torneio</label>
+                                <input asp-for="Name" class="form-control" placeholder="Ex: Campeonato de Verão 2025" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Game" class="form-label">Jogo</label>
+                                <select asp-for="Game" class="form-select" >
+                                    <option value="">Selecione o jogo</option>
+                                    <option value="1" style="color: black">League of Legends</option>
+                                    <option value="2" style="color: black">Valorant</option>
+                                </select>
+                                <span asp-validation-for="Game" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Descrição</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"
+                                      placeholder="Descreva as regras e informações do torneio..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="StartDate" class="form-label">Data de Início</label>
+                                <input asp-for="StartDate" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="StartDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EndDate" class="form-label">Data de Fim</label>
+                                <input asp-for="EndDate" type="datetime-local" class="form-control" />
+                                <span asp-validation-for="EndDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MaxParticipants" class="form-label">Máximo de Participantes</label>
+                                <input asp-for="MaxParticipants" type="number" class="form-control" min="2" max="100" value="16" />
+                                <span asp-validation-for="MaxParticipants" class="text-danger"></span>
+                                <div class="form-text">Entre 2 e 100 participantes</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Prize" class="form-label">Prêmio (R$)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input asp-for="Prize" type="number" class="form-control" min="0" step="0.01" />
+                                </div>
+                                <span asp-validation-for="Prize" class="text-danger"></span>
+                                <div class="form-text">Opcional - deixe 0 se não houver prêmio</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Criar Torneio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configurar datas mínimas
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const startDateInput = document.querySelector('input[name="StartDate"]');
+        const endDateInput = document.querySelector('input[name="EndDate"]');
+
+        if (startDateInput && endDateInput) {
+            // Data mínima é amanhã
+            startDateInput.min = tomorrow.toISOString().slice(0, 16);
+
+            // Quando a data de início mudar, ajustar data mínima de fim
+            startDateInput.addEventListener('change', function() {
+                const startDate = new Date(this.value);
+                const minEndDate = new Date(startDate);
+                minEndDate.setHours(minEndDate.getHours() + 1);
+                endDateInput.min = minEndDate.toISOString().slice(0, 16);
+            });
+        }
+    });
+</script>

@@ -1,0 +1,138 @@
+﻿@model IEnumerable<TournamentSystem.Models.Tournament>
+@{
+    ViewData["Title"] = "Página Inicial";
+}
+
+<div class="hero-section bg-gradient text-white py-5 mb-5 rounded">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-trophy text-warning me-3"></i>
+            Sistema de Torneios
+        </h1>
+        <p class="lead mb-4">Participe dos melhores torneios de League of Legends e Valorant</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <h2 class="mb-4">
+            <i class="fas fa-fire text-danger me-2"></i>
+            Torneios Ativos
+        </h2>
+
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var tournament in Model.Take(6))
+                {
+                    <div class="col-lg-6 mb-4">
+                        <div class="card tournament-card h-100 shadow-sm border-0">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">@tournament.Name</h5>
+                                    <span class="badge bg-warning text-dark">
+                                        @tournament.Game.GetDisplayName()
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">@tournament.Description</p>
+                                <div class="tournament-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-calendar text-primary me-2"></i>
+                                        <strong>Início:</strong> @tournament.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-users text-success me-2"></i>
+                                        <strong>Participantes:</strong> @tournament.Participants.Count/@tournament.MaxParticipants
+                                    </div>
+                                    @if (tournament.Prize > 0)
+                                    {
+                                        <div class="info-item">
+                                            <i class="fas fa-money-bill text-warning me-2"></i>
+                                            <strong>Prêmio:</strong> R$ @tournament.Prize.ToString("N2")
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a asp-controller="Tournament" asp-action="Details" asp-route-id="@tournament.Id"
+                                   class="btn btn-primary w-100">
+                                    <i class="fas fa-eye me-2"></i>Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Tournament" asp-action="Index" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-list me-2"></i>Ver Todos os Torneios
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                Nenhum torneio ativo no momento. Que tal criar o primeiro?
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Como Funciona
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h6>Crie torneios</h6>
+                        <p>Crie seus torneios gratuitamente</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h6>Participe</h6>
+                        <p>Inscreva-se nos torneios disponíveis</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h6>Compete</h6>
+                        <p>Jogue e ganhe prêmios incríveis</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-gamepad me-2"></i>
+                    Jogos Suportados
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="game-item">
+                    <i class="fas fa-crown text-warning me-3"></i>
+                    <strong>League of Legends</strong>
+                    <p class="mb-2 text-muted">MOBA competitivo da Riot Games</p>
+                </div>
+                <div class="game-item">
+                    <i class="fas fa-crosshairs text-danger me-3"></i>
+                    <strong>Valorant</strong>
+                    <p class="mb-0 text-muted">FPS tático da Riot Games</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

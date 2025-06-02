@@ -1,0 +1,130 @@
+﻿@model TournamentSystem.Models.ViewModels.JoinTournamentViewModel
+@{
+    ViewData["Title"] = "Participar do Torneio";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Participar do Torneio
+                    </h2>
+                    <p class="mb-0 mt-2">@Model.TournamentName</p>
+                    <small>@Model.GameType.GetDisplayName()</small>
+                </div>
+                <div class="card-body">
+                    <!-- Mostrar erros de validação de forma destacada -->
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.Any(x => x.Value.Errors.Count > 0))
+                    {
+                        <div class="alert alert-danger alert-enhanced" role="alert">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-exclamation-triangle fa-2x me-3 text-danger"></i>
+                                <div>
+                                    <h5 class="alert-heading mb-2"><strong>❌ Erro na Inscrição</strong></h5>
+                                    @foreach (var error in ViewData.ModelState.SelectMany(x => x.Value.Errors))
+                                    {
+                                        <p class="mb-1 fs-6"><strong>@error.ErrorMessage</strong></p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Verificação via Riot Games API:</strong>
+                        @if (Model.GameType == GameType.LeagueOfLegends)
+                        {
+                            <text>Use seu Riot ID completo (ex: "NomeDoJogador#BR1")</text>
+                        }
+                        else
+                        {
+                            <text>Digite seu Riot ID completo (ex: "NomeDoJogador#TAG")</text>
+                        }
+                    </div>
+
+                    <form asp-action="Join" method="post" id="joinForm">
+                        <input asp-for="TournamentId" type="hidden" />
+                        <input asp-for="TournamentName" type="hidden" />
+                        <input asp-for="GameType" type="hidden" />
+
+                        <div class="mb-3">
+                            <label asp-for="PlayerName" class="form-label">Nome do Jogador</label>
+                            <input asp-for="PlayerName" class="form-control" placeholder="Seu nome completo" required />
+                            <span asp-validation-for="PlayerName" class="text-danger"></span>
+                            <div class="form-text">Nome que será exibido no torneio</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="GameUsername" class="form-label">Riot ID</label>
+                            <input asp-for="GameUsername" class="form-control" id="gameUsernameInput"
+                                   placeholder="@(Model.GameType == GameType.LeagueOfLegends ? "NomeDoJogador#BR1" : "NomeDoJogador#TAG")"
+                                   required />
+                            <span asp-validation-for="GameUsername" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+                                <strong>Formato obrigatório:</strong> Nome#TAG (ex: Jogador#BR1)
+                            </div>
+                        </div>
+
+                        <!-- Resultado da verificação será mostrado apenas após submeter o formulário -->
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Details" asp-route-id="@Model.TournamentId" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Voltar
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-check me-2"></i>Confirmar Participação
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .alert-enhanced {
+        border: 2px solid #dc3545;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+        animation: shake 0.5s ease-in-out;
+    }
+
+    .alert-enhanced h5 {
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .alert-enhanced p {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+</style>
+
+<script>
+    // Script simplificado - verificação será feita apenas no submit do formulário
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('gameUsernameInput');
+
+        // Validação básica de formato do Riot ID
+        if (usernameInput) {
+            usernameInput.addEventListener('blur', function() {
+                const username = this.value.trim();
+                if (username && !username.includes('#')) {
+                    this.setCustomValidity('Formato inválido! Use o formato: Nome#TAG (ex: Jogador#BR1)');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+    });
+</script>

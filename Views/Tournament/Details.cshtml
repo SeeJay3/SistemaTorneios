@@ -1,0 +1,364 @@
+﻿@model TournamentSystem.Models.Tournament
+@{
+    ViewData["Title"] = $"Torneio - {Model.Name}";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow">
+                <div class="card-header @(Model.Game == GameType.LeagueOfLegends ? "bg-primary" : "bg-danger") text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">@Model.Name</h2>
+                            <span class="badge bg-light text-dark fs-6">
+                                <i class="fas @(Model.Game == GameType.LeagueOfLegends ? "fa-crown" : "fa-crosshairs") me-1"></i>
+                                @Model.Game.GetDisplayName()
+                                <i class="fas fa-check-circle text-success ms-1" title="Verificado via Riot Games API"></i>
+                            </span>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success fs-6">
+                                @Model.Status.GetDisplayName()
+                            </span>
+                            <!-- Botão para deletar torneio -->
+                            <button type="button" class="btn btn-danger btn-sm ms-2" onclick="deleteTournament(@Model.Id)" title="Deletar Torneio">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>🔥 Torneio com Riot Games API:</strong> Todos os participantes são verificados automaticamente via API oficial da Riot Games!
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-info-circle text-primary me-2"></i>Informações</h5>
+                            <div class="info-group">
+                                <div class="info-item">
+                                    <strong>Descrição:</strong>
+                                    <p>@(string.IsNullOrEmpty(Model.Description) ? "Sem descrição" : Model.Description)</p>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-alt text-success me-2"></i>
+                                    <strong>Data de Início:</strong> @Model.StartDate.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-calendar-check text-danger me-2"></i>
+                                    <strong>Data de Fim:</strong> @Model.EndDate.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-chart-bar text-info me-2"></i>Estatísticas</h5>
+                            <div class="stats-group">
+                                <div class="stat-card">
+                                    <div class="stat-number">@Model.Participants.Count</div>
+                                    <div class="stat-label">Participantes</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-number">@Model.MaxParticipants</div>
+                                    <div class="stat-label">Máximo</div>
+                                </div>
+                                @if (Model.Prize > 0)
+                                {
+                                    <div class="stat-card">
+                                        <div class="stat-number">R$ @Model.Prize.ToString("N0")</div>
+                                        <div class="stat-label">Prêmio</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.Status == TournamentStatus.Open && Model.Participants.Count < Model.MaxParticipants)
+                    {
+                        <div class="text-center mb-4">
+                            <a asp-action="Join" asp-route-id="@Model.Id" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus me-2"></i>Participar do Torneio
+                                <small class="d-block">Verificação automática via Riot API</small>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Participantes (@Model.Participants.Count/@Model.MaxParticipants)
+                        <i class="fas fa-shield-alt text-success ms-2" title="Verificados via Riot Games API"></i>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Participants.Any())
+                    {
+                        <div class="participants-list">
+                            @foreach (var participant in Model.Participants.OrderBy(p => p.RegisteredAt))
+                            {
+                                <div class="participant-item">
+                                    <div class="participant-header d-flex justify-content-between align-items-start">
+                                        <div class="participant-info flex-grow-1">
+                                            <div class="participant-name">
+                                                <i class="fas fa-user text-primary me-2"></i>
+                                                <strong class="text-dark">@participant.PlayerName</strong>
+                                                <i class="fas fa-check-circle text-success ms-1" title="Verificado via API"></i>
+                                            </div>
+                                            <!-- Nome do jogo MAIOR e mais visível -->
+                                            <div class="game-username">
+                                                <i class="fas fa-gamepad text-primary me-1"></i>
+                                                <strong class="text-primary fs-6">@participant.GameUsername</strong>
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(participant.Rank) &&
+                                           !participant.Rank.Contains("Verified") &&
+                                           !participant.Rank.Contains("Found") &&
+                                           !participant.Rank.Contains("Verificado") &&
+                                           !participant.Rank.Contains("Encontrada") &&
+                                           !participant.Rank.Contains("Conta") &&
+                                           !participant.Rank.Contains("Não Ranqueado") &&
+                                           !participant.Rank.Contains("UNRANKED") &&
+                                           !participant.Rank.Contains("Unranked") &&
+                                           participant.Rank != "Verificado" &&
+                                           !participant.Rank.Contains("LP") &&
+                                           !participant.Rank.ToUpper().Contains("UNRANKED"))
+                                            {
+                                                <div class="participant-rank">
+                                                    <small class="text-warning">
+                                                        <i class="fas fa-medal me-1"></i><strong>@participant.Rank</strong>
+                                                    </small>
+                                                </div>
+                                            }
+                                            <!-- NÃO mostrar ApiData que contém as informações do quadrado vermelho -->
+                                        </div>
+                                        <!-- Botão para remover participante -->
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                onclick="removeParticipant(@Model.Id, '@participant.PlayerName')"
+                                                title="Remover participante">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">
+                                        <i class="fas fa-clock me-1"></i>@participant.RegisteredAt.ToString("dd/MM HH:mm")
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-user-slash fa-2x mb-2"></i>
+                            <p>Nenhum participante ainda</p>
+                            <small>Seja o primeiro a se inscrever!</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Voltar aos Torneios
+        </a>
+    </div>
+</div>
+
+<!-- Modal de confirmação para deletar torneio -->
+<div class="modal fade" id="deleteTournamentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Tem certeza que deseja deletar este torneio?</strong></p>
+                <p class="text-muted">Esta ação não pode ser desfeita. Todos os participantes serão removidos.</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Torneio:</strong> @Model.Name<br>
+                    <strong>Participantes:</strong> @Model.Participants.Count
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Deletar Torneio
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação para remover participante -->
+<div class="modal fade" id="removeParticipantModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-minus me-2"></i>Remover Participante
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Tem certeza que deseja remover este participante?</strong></p>
+                <p class="text-muted">O jogador poderá se inscrever novamente se desejar.</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-user me-2"></i>
+                    <strong>Participante:</strong> <span id="participantNameToRemove"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" id="confirmRemoveBtn">
+                    <i class="fas fa-user-minus me-2"></i>Remover Participante
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .participant-item {
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #f8f9fa;
+        transition: all 0.3s;
+    }
+
+        .participant-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+    .game-username {
+        margin: 8px 0;
+        padding: 6px 10px;
+        background: rgba(13, 110, 253, 0.1);
+        border-radius: 6px;
+        border-left: 3px solid #0d6efd;
+    }
+
+    .participant-rank {
+        margin-top: 5px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        margin: 0.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+
+    .stats-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+
+    .participants-list {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .btn-outline-danger:hover {
+        transform: scale(1.1);
+    }
+</style>
+
+<script>
+    let tournamentIdToDelete = null;
+    let participantToRemove = { tournamentId: null, playerName: null };
+
+    // Função para deletar torneio
+    function deleteTournament(tournamentId) {
+        tournamentIdToDelete = tournamentId;
+        const modal = new bootstrap.Modal(document.getElementById('deleteTournamentModal'));
+        modal.show();
+    }
+
+    // Função para remover participante
+    function removeParticipant(tournamentId, playerName) {
+        participantToRemove.tournamentId = tournamentId;
+        participantToRemove.playerName = playerName;
+        document.getElementById('participantNameToRemove').textContent = playerName;
+        const modal = new bootstrap.Modal(document.getElementById('removeParticipantModal'));
+        modal.show();
+    }
+
+    // Confirmar exclusão do torneio
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+        if (!tournamentIdToDelete) return;
+
+        try {
+            const response = await fetch(`/Tournament/Delete/${tournamentIdToDelete}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                window.location.href = '/Tournament/Index';
+            } else {
+                alert('Erro ao deletar torneio. Tente novamente.');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao deletar torneio. Tente novamente.');
+        }
+    });
+
+    // Confirmar remoção do participante
+    document.getElementById('confirmRemoveBtn').addEventListener('click', async function() {
+        if (!participantToRemove.tournamentId || !participantToRemove.playerName) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('tournamentId', participantToRemove.tournamentId);
+            formData.append('playerName', participantToRemove.playerName);
+
+            const response = await fetch('/Tournament/LeaveTournament', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                location.reload(); // Recarrega a página para atualizar a lista
+            } else {
+                alert('Erro ao remover participante. Tente novamente.');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao remover participante. Tente novamente.');
+        }
+
+        // Fechar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('removeParticipantModal'));
+        modal.hide();
+    });
+</script>
